@@ -23,6 +23,11 @@ public class UserController {
     @PostMapping
     public ResponseEntity<User> addUser(@RequestBody User user) {
         AppValidator.userValidator(user);
+        for (User checkUser : users.values()) {
+            if (checkUser.getEmail().equals(user.getEmail())) {
+                throw new ValidationException("Пользователь с электронной почтой " + user.getEmail() + " уже существует");
+            }
+        }
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }

@@ -23,6 +23,11 @@ public class FilmController {
     @PostMapping
     public ResponseEntity<Film> addFilm(@RequestBody Film film) {
         AppValidator.filmValidator(film);
+        for (Film checkFilm : films.values()) {
+            if (checkFilm.getName().equals(film.getName())) {
+                throw new ValidationException("Фильм с названием " + film.getName() + " уже существует");
+            }
+        }
         film.setId(++identifier);
         films.put(film.getId(), film);
         log.info("Новый фильм {}, с id {} добавлен", film.getName(), film.getId());
@@ -32,7 +37,7 @@ public class FilmController {
     @PutMapping()
     public ResponseEntity<Film> updateFilm(@RequestBody Film film) {
         if (!films.containsKey(film.getId())) {
-            throw new ValidationException("фильм с id " + film.getId() + " не найден");
+            throw new ValidationException("Фильм с id " + film.getId() + " не найден");
         }
         AppValidator.filmValidator(film);
         film.setId(film.getId());

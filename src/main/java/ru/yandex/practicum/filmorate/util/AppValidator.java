@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.util;
 
+import lombok.experimental.UtilityClass;
 import ru.yandex.practicum.filmorate.exception.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
@@ -9,11 +10,8 @@ import java.time.LocalDate;
 import static ru.yandex.practicum.filmorate.util.AppConstants.MAX_DESCRIPTION_LENGTH;
 import static ru.yandex.practicum.filmorate.util.AppConstants.STARTING_DATE;
 
+@UtilityClass
 public final class AppValidator {
-
-    public AppValidator() {
-        throw new UnsupportedOperationException("Создание экземпляра утилитарного класса AppValidator недопустимо");
-    }
 
     public static void filmValidator(Film film) {
         if ((film.getName() == null || film.getName().isBlank())) {
