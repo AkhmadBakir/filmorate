@@ -4,19 +4,16 @@ import lombok.*;
 
 import java.time.LocalDate;
 
-/**
- * Film.
- */
 @Getter
 @Setter
 @ToString
 @EqualsAndHashCode
 @Builder
 @AllArgsConstructor
-public class Film {
+public class User {
     private int id;
+    private String email;
+    private String login;
     private String name;
-    private String description;
-    private LocalDate releaseDate;
-    private int duration;
+    private LocalDate birthday;
 }
