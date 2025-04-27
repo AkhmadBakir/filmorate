@@ -14,6 +14,10 @@ import static ru.yandex.practicum.filmorate.util.AppConstants.STARTING_DATE;
 public final class AppValidator {
 
     public static void filmValidator(Film film) {
+        if (film == null) {
+            throw new ValidationException("film не может быть null");
+        }
+
         if ((film.getName() == null || film.getName().isBlank())) {
             throw new ValidationException("название фильма не может быть пустым");
         }
@@ -32,6 +36,10 @@ public final class AppValidator {
     }
 
     public static void userValidator(User user) {
+        if (user == null) {
+            throw new ValidationException("user не может быть null");
+        }
+
         if (user.getLogin() == null || user.getLogin().isBlank()) {
             throw new ValidationException("логин не может быть пустым и содержать пробелы");
         }

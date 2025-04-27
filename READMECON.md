@@ -63,7 +63,7 @@ GET /films/popular?count={count} — возвращает список из пе
 500 — если возникло исключение.
 ```
 #### Подсказка
-НастройтеExceptionHandler для централизованной обработки ошибок.
+Настройте ExceptionHandler для централизованной обработки ошибок.
 ### Тестирование
 
 Убедитесь, что приложение работает, — протестируйте его с помощью Postman: [Коллекция Postman](https://github.com/yandex-praktikum/java-filmorate/blob/add-friends-likes/postman/sprint.json). 
