@@ -41,7 +41,7 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User updateUser(int userId, User user) {
         if (!users.containsKey(userId)) {
-            throw new NotFoundException("пользователь с id " + userId+ " не найден");
+            throw new NotFoundException("пользователь с id " + userId + " не найден");
         }
         AppValidator.userValidator(user);
         if (user.getName() == null || user.getName().isBlank()) {

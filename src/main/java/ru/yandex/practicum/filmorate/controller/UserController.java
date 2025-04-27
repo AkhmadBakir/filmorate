@@ -59,7 +59,7 @@ public class UserController {
     //    PUT /users/{id}/friends/{friendId} — добавление в друзья.
     @PutMapping("/{id}/friends/{friendId}")
     public ResponseEntity<User> addFriends(@PathVariable(value = "id") int id,
-                           @PathVariable(value = "friendId") int friendId) {
+                                           @PathVariable(value = "friendId") int friendId) {
         if (id == friendId) {
             throw new ValidationException("попытка добавления пользователя к себе в друзья");
         }
@@ -71,7 +71,7 @@ public class UserController {
     //    DELETE /users/{id}/friends/{friendId} — удаление из друзей.
     @DeleteMapping("/{id}/friends/{friendId}")
     public ResponseEntity<User> removeFriend(@PathVariable(value = "id") int id,
-                             @PathVariable(value = "friendId") int friendId) {
+                                             @PathVariable(value = "friendId") int friendId) {
         User user = userService.removeFriends(id, friendId);
         log.info("Пользователи с id {} и id {} удалены из друзей", id, friendId);
         return ResponseEntity.ok(user);
@@ -87,7 +87,7 @@ public class UserController {
     //    GET /users/{id}/friends/common/{otherId} — список друзей, общих с другим пользователем.
     @GetMapping("/{id}/friends/common/{otherId}")
     public ResponseEntity<List<User>> getCommonFriendsList(@PathVariable(value = "id") int id,
-                                          @PathVariable(value = "otherId") int otherId) {
+                                                           @PathVariable(value = "otherId") int otherId) {
         log.info("Запрошен список общих друзей пользователей с id {} и id {}", id, otherId);
         return ResponseEntity.ok(userService.getCommonFriendsList(id, otherId));
     }
