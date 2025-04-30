@@ -5,13 +5,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.impl.InMemoryFilmStorage;
 import ru.yandex.practicum.filmorate.storage.impl.InMemoryUserStorage;
 
 import java.time.LocalDate;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
