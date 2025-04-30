@@ -89,7 +89,15 @@ public class FilmController {
     @DeleteMapping("/{id}/like/{userId}")
     public ResponseEntity<Film> deleteLike(@PathVariable(value = "id") int id,
                                            @PathVariable(value = "userId") int userId) {
-        Film film = filmService.removeLike(id, userId);
+        Film film = filmService.getFilmById(id);
+        if (film == null) {
+            throw new NotFoundException("Фильм с id " + id + " не найден");
+        }
+        User user = userService.getUserById(userId);
+        if (user == null) {
+            throw new NotFoundException("Пользователь с id " + userId + " не найден");
+        }
+        filmService.removeLike(id, userId);
         log.info("Пользователю с id {} перестал нравится фильм с id: {}", userId, id);
         return ResponseEntity.ok(film);
     }
@@ -98,7 +106,15 @@ public class FilmController {
     @PutMapping("/{id}/dislike/{userId}")
     public ResponseEntity<Film> addDisLike(@PathVariable(value = "id") int id,
                                            @PathVariable(value = "userId") int userId) {
-        Film film = filmService.addDisLike(id, userId);
+        Film film = filmService.getFilmById(id);
+        if (film == null) {
+            throw new NotFoundException("Фильм с id " + id + " не найден");
+        }
+        User user = userService.getUserById(userId);
+        if (user == null) {
+            throw new NotFoundException("Пользователь с id " + userId + " не найден");
+        }
+        filmService.addDisLike(id, userId);
         log.info("Пользователю с id {} не понравился фильм с id: {}", userId, id);
         return ResponseEntity.ok(film);
     }
@@ -107,7 +123,15 @@ public class FilmController {
     @DeleteMapping("/{id}/dislike/{userId}")
     public ResponseEntity<Film> deleteDisLike(@PathVariable(value = "id") int id,
                                               @PathVariable(value = "userId") int userId) {
-        Film film = filmService.removeDisLike(id, userId);
+        Film film = filmService.getFilmById(id);
+        if (film == null) {
+            throw new NotFoundException("Фильм с id " + id + " не найден");
+        }
+        User user = userService.getUserById(userId);
+        if (user == null) {
+            throw new NotFoundException("Пользователь с id " + userId + " не найден");
+        }
+        filmService.removeDisLike(id, userId);
         log.info("Пользователю с id {} перестал не нравится фильм с id: {}", userId, id);
         return ResponseEntity.ok(film);
     }
