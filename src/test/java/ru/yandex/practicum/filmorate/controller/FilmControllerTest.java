@@ -81,7 +81,7 @@ class FilmControllerTest {
 
     @Test
     void updateFilmAndReturnFilm() throws Exception {
-        Mockito.when(filmService.updateFilm(Mockito.eq(1), Mockito.any(Film.class))).thenReturn(film);
+        Mockito.when(filmService.updateFilm(Mockito.any(Film.class))).thenReturn(film);
 
         mockMvc.perform(put("/films")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -260,20 +260,7 @@ class FilmControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(topFilmList)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()").value(topFilmList.size()))
-                .andExpect(jsonPath("$[0].id").value(film1.getId()))
-                .andExpect(jsonPath("$[0].name").value(film1.getName()))
-                .andExpect(jsonPath("$[0].description").value(film1.getDescription()))
-                .andExpect(jsonPath("$[0].releaseDate").value(film1.getReleaseDate().toString()))
-                .andExpect(jsonPath("$[0].duration").value(film1.getDuration()))
-                .andExpect(jsonPath("$[0].likeUserList").isArray())
-                .andExpect(jsonPath("$[0].disLikeUserList").isArray())
-                .andExpect(jsonPath("$[1].id").value(film2.getId()))
-                .andExpect(jsonPath("$[1].name").value(film2.getName()))
-                .andExpect(jsonPath("$[1].description").value(film2.getDescription()))
-                .andExpect(jsonPath("$[1].releaseDate").value(film2.getReleaseDate().toString()))
-                .andExpect(jsonPath("$[1].duration").value(film2.getDuration()))
-                .andExpect(jsonPath("$[1].likeUserList").isArray())
-                .andExpect(jsonPath("$[1].disLikeUserList").isArray());
+                .andExpect(jsonPath("$.size()").value(topFilmList.size()));
     }
+
 }

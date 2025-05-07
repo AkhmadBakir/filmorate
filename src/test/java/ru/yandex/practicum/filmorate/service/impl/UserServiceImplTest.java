@@ -49,7 +49,7 @@ class UserServiceImplTest {
 
         Set<Integer> friendsList2 = Set.of(4, 5, 6);
         User user2 = new User(1, "test2@test.ru", "login2", "name2", LocalDate.of(2002, 2, 2), friendsList2);
-        userServiceImpl.updateUser(1, user2);
+        userServiceImpl.updateUser(user2);
 
         assertThat(userServiceImpl.getUserById(1))
                 .isNotNull()

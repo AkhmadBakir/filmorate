@@ -73,7 +73,7 @@ class UserControllerTest {
                 .friends(new HashSet<>())
                 .build();
 
-        Mockito.when(userService.updateUser(Mockito.eq(1), Mockito.any(User.class))).thenReturn(updateUser);
+        Mockito.when(userService.updateUser(Mockito.any(User.class))).thenReturn(updateUser);
 
         mockMvc.perform(put("/users")
                         .contentType(MediaType.APPLICATION_JSON)

@@ -23,21 +23,25 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public Film addFilm(Film film) {
+        log.info("новый фильм {}, с id {} добавлен", film.getName(), film.getId());
         return filmStorage.addFilm(film);
     }
 
     @Override
-    public Film updateFilm(int filmId, Film film) {
-        return filmStorage.updateFilm(filmId, film);
+    public Film updateFilm(Film film) {
+        log.info("фильм {}, с id {} обновлен", film.getName(), film.getId());
+        return filmStorage.updateFilm(film);
     }
 
     @Override
     public List<Film> allFilms() {
+        log.info("запрошен список всех фильмов, всего фильмов {}", filmStorage.allFilms().size());
         return filmStorage.allFilms();
     }
 
     @Override
     public Film getFilmById(int filmId) {
+        log.info("запрошен фильм, с id {} ", filmId);
         return filmStorage.getFilmById(filmId);
     }
 

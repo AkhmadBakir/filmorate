@@ -46,7 +46,7 @@ class InMemoryUserStorageTest {
 
         Set<Integer> friendsList2 = Set.of(4, 5, 6);
         User user2 = new User(1, "test2@test.ru", "login2", "name2", LocalDate.of(2002, 2, 2), friendsList2);
-        inMemoryUserStorage.updateUser(1, user2);
+        inMemoryUserStorage.updateUser(user2);
 
         assertThat(inMemoryUserStorage.getUserById(1))
                 .isNotNull()

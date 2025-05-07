@@ -8,10 +8,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 import ru.yandex.practicum.filmorate.util.AppValidator;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -23,6 +20,9 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User addUser(User user) {
         AppValidator.userValidator(user);
+        if (user.getFriends() == null) {
+            user.setFriends(new HashSet<>());
+        }
         for (User checkUser : users.values()) {
             if (checkUser.getEmail().equals(user.getEmail())) {
                 throw new ValidationException("пользователь с электронной почтой " + user.getEmail() + " уже существует");
@@ -39,16 +39,15 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User updateUser(int userId, User user) {
-        if (!users.containsKey(userId)) {
-            throw new NotFoundException("пользователь с id " + userId + " не найден");
+    public User updateUser(User user) {
+        if (!users.containsKey(user.getId())) {
+            throw new NotFoundException("пользователь с id " + user.getId() + " не найден");
         }
         AppValidator.userValidator(user);
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
-        user.setId(userId);
-        users.put(userId, user);
+        users.put(user.getId(), user);
         log.info("пользователь с именем {}, адресом электронной почты {} и id {} обновлен",
                 user.getName(), user.getEmail(), user.getId());
         return user;

@@ -8,10 +8,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.util.AppValidator;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -23,6 +20,12 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Film addFilm(Film film) {
         AppValidator.filmValidator(film);
+        if (film.getLikeUserList() == null) {
+            film.setLikeUserList(new HashSet<>());
+        }
+        if (film.getDisLikeUserList() == null) {
+            film.setDisLikeUserList(new HashSet<>());
+        }
         for (Film checkFilm : films.values()) {
             if (checkFilm.getName().equals(film.getName())) {
                 throw new ValidationException("фильм с названием " + film.getName() + " уже существует");
@@ -35,13 +38,18 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film updateFilm(int filmId, Film film) {
-        if (!films.containsKey(filmId)) {
+    public Film updateFilm(Film film) {
+        AppValidator.filmValidator(film);
+        if (film.getLikeUserList() == null) {
+            film.setLikeUserList(new HashSet<>());
+        }
+        if (film.getDisLikeUserList() == null) {
+            film.setDisLikeUserList(new HashSet<>());
+        }
+        if (!films.containsKey(film.getId())) {
             throw new NotFoundException("фильм с id " + film.getId() + " не найден");
         }
-        AppValidator.filmValidator(film);
-        film.setId(filmId);
-        films.put(filmId, film);
+        films.put(film.getId(), film);
         log.info("фильм {} с id {} обновлен", film.getName(), film.getId());
         return film;
     }

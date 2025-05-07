@@ -50,7 +50,7 @@ class InMemoryFilmStorageTest {
         Set<Integer> likeUserList2 = Set.of(7, 8, 9);
         Set<Integer> disLikeUserList2 = Set.of(10, 11, 12);
         Film film2 = new Film(1, "name2", "description2", LocalDate.of(2002, 2, 2), 90, likeUserList2, disLikeUserList2);
-        inMemoryFilmStorage.updateFilm(1, film2);
+        inMemoryFilmStorage.updateFilm(film2);
 
         assertThat(inMemoryFilmStorage.getFilmById(1))
                 .isNotNull()

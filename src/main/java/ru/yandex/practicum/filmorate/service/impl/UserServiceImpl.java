@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
@@ -22,26 +23,33 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User addUser(User user) {
+        log.info("добавлен пользователь с id {} ", user.getId());
         return userStorage.addUser(user);
     }
 
     @Override
-    public User updateUser(int userId, User user) {
-        return userStorage.updateUser(userId, user);
+    public User updateUser(User user) {
+        log.info("данные пользователя с id {} обновлены ", user.getId());
+        return userStorage.updateUser(user);
     }
 
     @Override
     public List<User> allUsers() {
+        log.info("запрошен список всех пользователей, всего пользователей {}", userStorage.allUsers().size());
         return userStorage.allUsers();
     }
 
     @Override
     public User getUserById(int userId) {
+        log.info("запрошен пользователь с id {} ", userId);
         return userStorage.getUserById(userId);
     }
 
     @Override
     public User addFriends(int userId, int friendId) {
+        if (userId == friendId) {
+            throw new ValidationException("попытка добавления пользователя к себе в друзья");
+        }
         User user = userStorage.getUserById(userId);
         User friendUser = userStorage.getUserById(friendId);
         if (user.getFriends() == null) {
