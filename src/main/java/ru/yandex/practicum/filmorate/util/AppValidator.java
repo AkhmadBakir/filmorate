@@ -51,7 +51,6 @@ public final class AppValidator {
         if (user.getBirthday().isAfter(LocalDate.now())) {
             throw new ValidationException("дата рождения не может быть в будущем");
         }
-
     }
 
 }
