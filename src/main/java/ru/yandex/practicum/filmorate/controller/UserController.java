@@ -4,13 +4,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.dto.NewUserRequest;
+import ru.yandex.practicum.filmorate.storage.dto.UpdateUserRequest;
+import ru.yandex.practicum.filmorate.storage.dto.UserDto;
 
 import java.util.List;
 
 /**
- *  Контроллер HTTP запросов UserController
+ * Контроллер HTTP запросов UserController
  */
 @Slf4j
 @RestController
@@ -20,102 +22,105 @@ public class UserController {
 
     private final UserService userService;
 
-    /**    POST /users/ — создание пользователя.
+    /**
+     * POST /users/ — создание пользователя.
      *
-     * @param user
+     * @param newUserRequest
      * @return
      */
     @PostMapping
-    public ResponseEntity<User> addUser(@RequestBody User user) {
-        User newUser = userService.addUser(user);
-        log.info("Добавлен новый пользователь: {}", newUser.getId());
-        return ResponseEntity.ok(newUser);
+    public ResponseEntity<UserDto> addUser(@RequestBody NewUserRequest newUserRequest) {
+        UserDto userDto = userService.addUser(newUserRequest);
+        log.info("UserController: добавлен новый пользователь: {}", userDto.getId());
+        return ResponseEntity.ok(userDto);
     }
-
     /**    PUT /users/ — обновление пользователя.
      *
-     * @param user
+     * @param updateUserRequest
      * @return
      */
     @PutMapping()
-    public ResponseEntity<User> updateUser(@RequestBody User user) {
-        User updateUser = userService.updateUser(user);
-        log.info("Данные пользователя обновлены: {}", user.getId());
-        return ResponseEntity.ok(updateUser);
+    public ResponseEntity<UserDto> updateUser(@RequestBody UpdateUserRequest updateUserRequest) {
+        UserDto userDto = userService.updateUser(updateUserRequest);
+        log.info("UserController: данные пользователя обновлены: {}", userDto.getId());
+        return ResponseEntity.ok(userDto);
     }
 
-    /**    GET /users/ — получение всех пользователей.
+    /**
+     * GET /users/ — получение всех пользователей.
      *
      * @return
      */
     @GetMapping()
-    public ResponseEntity<List<User>> allUsers() {
-        log.info("Количество всех пользователей: {}", userService.allUsers().size());
+    public ResponseEntity<List<UserDto>> allUsers() {
+        log.info("UserController: количество всех пользователей: {}", userService.allUsers().size());
         return ResponseEntity.ok(userService.allUsers());
     }
 
-    /**    GET /users/{id} — получение пользователя.
+    /**
+     * GET /users/{userId} — получение пользователя.
      *
-     * @param id
+     * @param userId
      * @return
      */
-    @GetMapping("/{id}")
-    public ResponseEntity<User> getUser(@PathVariable(value = "id") int id) {
-        User user = userService.getUserById(id);
-        log.info("Запрошен пользователь с id: {}", id);
-        return ResponseEntity.ok(user);
+    @GetMapping("/{userId}")
+    public ResponseEntity<UserDto> getUser(@PathVariable(value = "userId") int userId) {
+        log.info("UserController: запрошен пользователь с id: {}", userId);
+        return ResponseEntity.ok(userService.getUserById(userId));
     }
 
-    /**    PUT /users/{id}/friends/{friendId} — добавление в друзья.
+    /**
+     * PUT /users/{id}/friends/{friendId} — добавление в друзья.
      *
-     * @param id
+     * @param userId
      * @param friendId
      * @return
      */
-    @PutMapping("/{id}/friends/{friendId}")
-    public ResponseEntity<User> addFriends(@PathVariable(value = "id") int id,
-                                           @PathVariable(value = "friendId") int friendId) {
-        User user = userService.addFriends(id, friendId);
-        log.info("Пользователи с id {} и id {} добавлены в друзья", id, friendId);
-        return ResponseEntity.ok(user);
+    @PutMapping("/{userId}/friends/{friendId}")
+    public void addFriends(@PathVariable(value = "userId") int userId,
+                           @PathVariable(value = "friendId") int friendId) {
+        userService.addFriends(userId, friendId);
+        log.info("UserController: пользователи с id {} и id {} добавлены в друзья", userId, friendId);
     }
 
-    /**    DELETE /users/{id}/friends/{friendId} — удаление из друзей.
+    /**
+     * DELETE /users/{id}/friends/{friendId} — удаление из друзей.
      *
-     * @param id
+     * @param userId
      * @param friendId
      * @return
      */
-    @DeleteMapping("/{id}/friends/{friendId}")
-    public ResponseEntity<User> removeFriend(@PathVariable(value = "id") int id,
-                                             @PathVariable(value = "friendId") int friendId) {
-        User user = userService.removeFriends(id, friendId);
-        log.info("Пользователи с id {} и id {} удалены из друзей", id, friendId);
-        return ResponseEntity.ok(user);
+    @DeleteMapping("/{userId}/friends/{friendId}")
+    public void removeFriend(@PathVariable(value = "userId") int userId,
+                             @PathVariable(value = "friendId") int friendId) {
+        userService.removeFriends(userId, friendId);
+        log.info("UserController: пользователи с id {} и id {} удалены из друзей", userId, friendId);
     }
 
-    /**    GET /users/{id}/friends — возвращаем список пользователей, являющихся его друзьями.
+    /**
+     * GET /users/{id}/friends — возвращаем список пользователей, являющихся его друзьями.
      *
-     * @param id
+     * @param userId
      * @return
      */
-    @GetMapping("/{id}/friends")
-    public ResponseEntity<List<User>> getFriendsList(@PathVariable(value = "id") int id) {
-        log.info("Запрошен пользователь с id: {}", id);
-        return ResponseEntity.ok(userService.getFriendsList(id));
+    @GetMapping("/{userId}/friends")
+    public ResponseEntity<List<UserDto>> getFriendsList(@PathVariable(value = "userId") int userId) {
+        log.info("UserController: запрошен пользователь с id: {}", userId);
+        return ResponseEntity.ok(userService.getFriendsList(userId));
     }
 
-    /**    GET /users/{id}/friends/common/{otherId} — список друзей, общих с другим пользователем.
+    /**
+     * GET /users/{id}/friends/common/{otherId} — список друзей, общих с другим пользователем.
      *
-     * @param id
+     * @param userId
      * @param otherId
      * @return
      */
-    @GetMapping("/{id}/friends/common/{otherId}")
-    public ResponseEntity<List<User>> getCommonFriendsList(@PathVariable(value = "id") int id,
-                                                           @PathVariable(value = "otherId") int otherId) {
-        log.info("Запрошен список общих друзей пользователей с id {} и id {}", id, otherId);
-        return ResponseEntity.ok(userService.getCommonFriendsList(id, otherId));
+    @GetMapping("/{userId}/friends/common/{otherId}")
+    public ResponseEntity<List<UserDto>> getCommonFriendsList(@PathVariable(value = "userId") int userId,
+                                                              @PathVariable(value = "otherId") int otherId) {
+        log.info("UserController: запрошен список общих друзей пользователей с id {} и id {}", userId, otherId);
+        return ResponseEntity.ok(userService.getCommonFriendsList(userId, otherId));
     }
 
 }

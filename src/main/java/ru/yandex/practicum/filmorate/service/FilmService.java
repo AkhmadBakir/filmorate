@@ -1,28 +1,26 @@
 package ru.yandex.practicum.filmorate.service;
 
-import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.dto.FilmDto;
+import ru.yandex.practicum.filmorate.storage.dto.NewFilmRequest;
+import ru.yandex.practicum.filmorate.storage.dto.UpdateFilmRequest;
 
 import java.util.List;
 import java.util.Set;
 
 public interface FilmService {
 
-    Film addFilm(Film film);
+    FilmDto addFilm(NewFilmRequest newFilmRequest);
 
-    List<Film> allFilms();
+    List<FilmDto> allFilms();
 
-    Film updateFilm(Film film);
+    FilmDto updateFilm(UpdateFilmRequest updateFilmRequest);
 
-    Film getFilmById(int filmId);
+    FilmDto getFilmById(int filmId);
 
-    Film addLike(int filmId, int userId);
+    void addLike(int filmId, int userId);
 
-    Film removeLike(int filmId, int userId);
+    void removeLike(int filmId, int userId);
 
-    Film addDisLike(int filmId, int userId);
-
-    Film removeDisLike(int filmId, int userId);
-
-    Set<Film> getTopFilms(int count);
+    Set<FilmDto> getTopFilms(int count);
 
 }
