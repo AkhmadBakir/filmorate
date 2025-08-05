@@ -34,7 +34,9 @@ public class UserController {
         log.info("UserController: добавлен новый пользователь: {}", userDto.getId());
         return ResponseEntity.ok(userDto);
     }
-    /**    PUT /users/ — обновление пользователя.
+
+    /**
+     * PUT /users/ — обновление пользователя.
      *
      * @param updateUserRequest
      * @return
