@@ -9,8 +9,10 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
+import ru.yandex.practicum.filmorate.mappers.FilmRowMapper;
 import ru.yandex.practicum.filmorate.mappers.GenreRowMapper;
 import ru.yandex.practicum.filmorate.mappers.MpaRowMapper;
+import ru.yandex.practicum.filmorate.mappers.UserRowMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -32,7 +34,9 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
         MpaDbStorage.class,
         GenreDbStorage.class,
         GenreRowMapper.class,
-        MpaRowMapper.class
+        MpaRowMapper.class,
+        FilmRowMapper.class,
+        UserRowMapper.class
 })
 class FilmDbStorageTest {
 
@@ -66,8 +70,8 @@ class FilmDbStorageTest {
 
     @Test
     void shouldCheckFilmExists() {
-        boolean isExists1 = filmDbStorage.filmExists(1);
-        boolean isExists2 = filmDbStorage.filmExists(100);
+        boolean isExists1 = filmDbStorage.checkExists(1);
+        boolean isExists2 = filmDbStorage.checkExists(100);
 
         assertThat(isExists1)
                 .isEqualTo(true);
@@ -77,7 +81,7 @@ class FilmDbStorageTest {
 
     @Test
     void shouldGetFilmById() {
-        Film film = filmDbStorage.getFilmById(1);
+        Film film = filmDbStorage.findById(1);
 
         assertThat(film)
                 .isNotNull()
@@ -87,10 +91,10 @@ class FilmDbStorageTest {
 
     @Test
     void shouldGetAllFilms() {
-        List<Film> allFilms = filmDbStorage.allFilms();
-        Film film1 = filmDbStorage.getFilmById(1);
-        Film film2 = filmDbStorage.getFilmById(2);
-        Film film3 = filmDbStorage.getFilmById(3);
+        List<Film> allFilms = filmDbStorage.findAll();
+        Film film1 = filmDbStorage.findById(1);
+        Film film2 = filmDbStorage.findById(2);
+        Film film3 = filmDbStorage.findById(3);
 
         AssertionsForInterfaceTypes.assertThat(allFilms)
                 .isNotNull()
@@ -115,8 +119,8 @@ class FilmDbStorageTest {
                 .genres(Set.of(genre1, genre2))
                 .build();
 
-        filmDbStorage.updateFilm(film1);
-        Film updatedFilm = filmDbStorage.getFilmById(1);
+        filmDbStorage.update(film1);
+        Film updatedFilm = filmDbStorage.findById(1);
 
         assertThat(updatedFilm).isNotNull();
         assertThat(updatedFilm.getName()).isEqualTo("updateName");
@@ -152,9 +156,9 @@ class FilmDbStorageTest {
         film4.setMpa(mpa);
         film4.setGenres(Set.of(genre1, genre2));
 
-        filmDbStorage.addFilm(film4);
+        filmDbStorage.add(film4);
 
-        assertThat(filmDbStorage.getFilmById(1))
+        assertThat(filmDbStorage.findById(1))
                 .isNotNull()
                 .extracting(Film::getId, Film::getName, Film::getDescription, Film::getReleaseDate, Film::getDuration)
                 .containsExactly(1, "name4", "description4", LocalDate.of(2002, 2, 2), 60);
@@ -162,10 +166,10 @@ class FilmDbStorageTest {
 
     @Test
     void shouldAddLike() {
-        User user = userDbStorage.getUserById(1);
-        Film film = filmDbStorage.getFilmById(1);
+        User user = userDbStorage.findById(1);
+        Film film = filmDbStorage.findById(1);
         filmDbStorage.addLike(film.getId(), user.getId());
-        film = filmDbStorage.getFilmById(1);
+        film = filmDbStorage.findById(1);
 
         AssertionsForInterfaceTypes.assertThat(film.getLikeUserList())
                 .containsExactlyInAnyOrder(user.getId());
@@ -173,10 +177,10 @@ class FilmDbStorageTest {
 
     @Test
     void shouldRemoveLike() {
-        User user = userDbStorage.getUserById(1);
-        Film film = filmDbStorage.getFilmById(1);
+        User user = userDbStorage.findById(1);
+        Film film = filmDbStorage.findById(1);
         filmDbStorage.removeLike(film.getId(), user.getId());
-        film = filmDbStorage.getFilmById(1);
+        film = filmDbStorage.findById(1);
 
         AssertionsForInterfaceTypes.assertThat(film.getLikeUserList())
                 .isEmpty();
@@ -184,9 +188,6 @@ class FilmDbStorageTest {
 
     @Test
     void shouldGetTopPopular() {
-        Film film1 = filmDbStorage.getFilmById(1);
-        Film film2 = filmDbStorage.getFilmById(2);
-        Film film3 = filmDbStorage.getFilmById(3);
         filmDbStorage.addLike(1, 1);
         filmDbStorage.addLike(1, 2);
         filmDbStorage.addLike(1, 3);
@@ -194,6 +195,10 @@ class FilmDbStorageTest {
         filmDbStorage.addLike(2, 2);
         filmDbStorage.addLike(3, 1);
         List<Film> topPopular = filmDbStorage.getTopPopular(3);
+
+        Film film1 = filmDbStorage.findById(1);
+        Film film2 = filmDbStorage.findById(2);
+        Film film3 = filmDbStorage.findById(3);
 
         AssertionsForInterfaceTypes.assertThat(topPopular)
                 .isNotNull()

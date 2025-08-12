@@ -26,9 +26,9 @@ public class GenreDbStorage implements GenreStorage {
     private final GenreRowMapper genreRowMapper;
 
     @Override
-    public boolean genreExists(Set<Genre> genres) {
+    public boolean checkExists(Set<Genre> genres) {
         if (genres == null || genres.isEmpty()) {
-            return true; // или false — зависит от бизнес-логики
+            return true;
         }
 
         String sql = "SELECT genre_id FROM genres WHERE genre_id IN (:ids)";

@@ -22,7 +22,7 @@ public class MpaDbStorage implements MpaStorage {
     private final MpaRowMapper mpaRowMapper;
 
     @Override
-    public boolean mpaExists(int mpaId) {
+    public boolean checkExists(int mpaId) {
         String queryMpa = "SELECT COUNT(*) FROM rating_mpa WHERE rating_id = ?";
         Integer count = jdbcTemplate.queryForObject(queryMpa, Integer.class, mpaId);
         log.info("MpaDbStorage: проверка существования рейтинга с id: {}", mpaId);

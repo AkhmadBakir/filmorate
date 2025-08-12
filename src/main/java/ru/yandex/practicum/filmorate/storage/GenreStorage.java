@@ -7,7 +7,7 @@ import java.util.Set;
 
 public interface GenreStorage {
 
-    boolean genreExists(Set<Genre> genres);
+    boolean checkExists(Set<Genre> genres);
 
     Genre getGenreById(int genreId);
 

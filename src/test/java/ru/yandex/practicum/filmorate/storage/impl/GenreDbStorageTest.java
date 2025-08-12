@@ -13,7 +13,6 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import java.util.Collection;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @JdbcTest
@@ -28,8 +27,8 @@ class GenreDbStorageTest {
     void shouldGenreExists() {
         Genre genre1 = new Genre(1, "Комедия");
         Genre genre2 = new Genre(10, "Comedy");
-        boolean isExists1 = genreDbStorage.genreExists(Set.of(genre1));
-        boolean isExists2 = genreDbStorage.genreExists(Set.of(genre2));
+        boolean isExists1 = genreDbStorage.checkExists(Set.of(genre1));
+        boolean isExists2 = genreDbStorage.checkExists(Set.of(genre2));
 
         assertThat(isExists1)
                 .isEqualTo(true);
@@ -54,4 +53,5 @@ class GenreDbStorageTest {
                 .isNotNull()
                 .hasSize(6);
     }
+
 }

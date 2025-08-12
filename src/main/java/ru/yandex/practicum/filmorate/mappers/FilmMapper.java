@@ -8,7 +8,7 @@ import ru.yandex.practicum.filmorate.storage.dto.NewFilmRequest;
 import ru.yandex.practicum.filmorate.storage.dto.UpdateFilmRequest;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class FilmMapper {
+public class FilmMapper {
 
     public static Film mapToFilm(NewFilmRequest newFilmRequest) {
         Film film = new Film();

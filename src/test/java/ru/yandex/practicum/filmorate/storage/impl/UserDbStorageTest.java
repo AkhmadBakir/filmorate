@@ -9,6 +9,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
+import ru.yandex.practicum.filmorate.mappers.UserRowMapper;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
@@ -21,7 +22,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @JdbcTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@Import({UserDbStorage.class})
+@Import({UserDbStorage.class, UserRowMapper.class})
 class UserDbStorageTest {
 
     private final JdbcTemplate jdbcTemplate;
@@ -42,8 +43,8 @@ class UserDbStorageTest {
 
     @Test
     void shouldCheckUserExists() {
-        boolean isExists1 = userDbStorage.userExists(1);
-        boolean isExists2 = userDbStorage.userExists(100);
+        boolean isExists1 = userDbStorage.checkExists(1);
+        boolean isExists2 = userDbStorage.checkExists(100);
 
         assertThat(isExists1)
                 .isEqualTo(true);
@@ -53,7 +54,7 @@ class UserDbStorageTest {
 
     @Test
     public void shouldGetUserById() {
-        User user = userDbStorage.getUserById(1);
+        User user = userDbStorage.findById(1);
 
         assertThat(user)
                 .isNotNull()
@@ -64,8 +65,8 @@ class UserDbStorageTest {
     @Test
     void shouldAddFriendShips() {
         userDbStorage.addFriendShips(1, 3);
-        User user1 = userDbStorage.getUserById(1);
-        User user2 = userDbStorage.getUserById(3);
+        User user1 = userDbStorage.findById(1);
+        User user2 = userDbStorage.findById(3);
 
         assertThat(user1.getFriends())
                 .isNotNull()
@@ -78,8 +79,8 @@ class UserDbStorageTest {
     @Test
     void shouldDeleteFriendShip() {
         userDbStorage.deleteFriendShip(1, 3);
-        User user1 = userDbStorage.getUserById(1);
-        User user2 = userDbStorage.getUserById(3);
+        User user1 = userDbStorage.findById(1);
+        User user2 = userDbStorage.findById(3);
 
         assertThat(user1.getFriends())
                 .isNotNull()
@@ -91,10 +92,10 @@ class UserDbStorageTest {
 
     @Test
     void shouldGetAllUsers() {
-        List<User> allUsers = userDbStorage.allUsers();
-        User user1 = userDbStorage.getUserById(1);
-        User user2 = userDbStorage.getUserById(2);
-        User user3 = userDbStorage.getUserById(3);
+        List<User> allUsers = userDbStorage.findAll();
+        User user1 = userDbStorage.findById(1);
+        User user2 = userDbStorage.findById(2);
+        User user3 = userDbStorage.findById(3);
 
         AssertionsForInterfaceTypes.assertThat(allUsers)
                 .isNotNull()
@@ -112,8 +113,8 @@ class UserDbStorageTest {
                 .birthday(LocalDate.of(2011, 11, 11))
                 .friends(new HashSet<>())
                 .build();
-        userDbStorage.updateUser(user1);
-        user1 = userDbStorage.getUserById(1);
+        userDbStorage.update(user1);
+        user1 = userDbStorage.findById(1);
 
         assertThat(user1)
                 .isNotNull()
@@ -132,9 +133,9 @@ class UserDbStorageTest {
         user4.setName("name4");
         user4.setBirthday(LocalDate.of(2004, 4, 4));
 
-        userDbStorage.addUser(user4);
+        userDbStorage.add(user4);
 
-        assertThat(userDbStorage.getUserById(1))
+        assertThat(userDbStorage.findById(1))
                 .isNotNull()
                 .extracting(User::getId, User::getEmail, User::getLogin, User::getName, User::getBirthday)
                 .containsExactly(1, "test4@test.ru", "login4", "name4", LocalDate.of(2004, 4, 4));

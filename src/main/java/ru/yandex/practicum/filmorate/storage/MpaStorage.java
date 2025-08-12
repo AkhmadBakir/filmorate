@@ -6,7 +6,7 @@ import java.util.Collection;
 
 public interface MpaStorage {
 
-    boolean mpaExists(int mpaId);
+    boolean checkExists(int mpaId);
 
     Mpa getMpaById(int mpaId);
 

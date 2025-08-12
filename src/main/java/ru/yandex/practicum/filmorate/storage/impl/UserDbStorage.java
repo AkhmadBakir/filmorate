@@ -7,24 +7,27 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.mappers.UserExtractor;
-import ru.yandex.practicum.filmorate.mappers.UsersExtractor;
+import ru.yandex.practicum.filmorate.mappers.UserRowMapper;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.storage.Storage;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Repository
 @RequiredArgsConstructor
-public class UserDbStorage implements UserStorage {
+public class UserDbStorage implements Storage<User> {
 
     private final JdbcTemplate jdbcTemplate;
+    private final UserRowMapper userRowMapper;
 
     @Override
-    public boolean userExists(int userId) {
+    public boolean checkExists(int userId) {
         String sqlQuery = "SELECT COUNT(*) FROM users WHERE user_id = ?";
         Integer count = jdbcTemplate.queryForObject(sqlQuery, Integer.class, userId);
         log.info("UserDbStorage: проверка существования пользователя с id: {}", userId);
@@ -32,29 +35,35 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public User getUserById(int userId) {
+    public User findById(int userId) {
         String queryUser = "SELECT u.user_id, u.name, u.email, u.login, u.birthday, uf.friend_id " +
                 "FROM users u " +
                 "LEFT JOIN user_friendships uf ON u.user_id = uf.user_id " +
                 "WHERE u.user_id = ? ";
-        if (!userExists(userId)) {
+        if (!checkExists(userId)) {
             throw new NotFoundException("пользователь с id: " + userId + " не найден");
         }
         try {
             log.info("UserDbStorage: запрос пользователя с id: {}", userId);
-            return jdbcTemplate.query(queryUser, new Object[]{userId}, new UserExtractor());
+            List<User> userRows = jdbcTemplate.query(queryUser, userRowMapper, userId);
+            User user = userRows.getFirst();
+            for (User userRow : userRows) {
+                if (userRow.getFriends() != null) {
+                    user.getFriends().addAll(userRow.getFriends());
+                }
+            }
+            return user;
         } catch (EmptyResultDataAccessException e) {
             throw new NotFoundException("UserDbStorage: не удалось получить пользователя с id: " + userId);
         }
     }
 
-    @Override
     public void addFriendShips(int userId, int friendId) {
         String queryFriend = "INSERT INTO user_friendships (user_id, friend_id) VALUES (?, ?)";
-        if (!userExists(userId)) {
+        if (!checkExists(userId)) {
             throw new NotFoundException("UserDbStorage: пользователь с id: " + userId + " не найден");
         }
-        if (!userExists(friendId)) {
+        if (!checkExists(friendId)) {
             throw new NotFoundException("UserDbStorage: пользователь с id: " + friendId + " не найден");
         }
         try {
@@ -66,13 +75,12 @@ public class UserDbStorage implements UserStorage {
         }
     }
 
-    @Override
     public void deleteFriendShip(int userId, int friendId) {
         String queryDeleteFriend = "DELETE FROM user_friendships WHERE user_id = ? AND friend_id = ?";
-        if (!userExists(userId)) {
+        if (!checkExists(userId)) {
             throw new NotFoundException("UserDbStorage: пользователь с id: " + userId + " не найден");
         }
-        if (!userExists(friendId)) {
+        if (!checkExists(friendId)) {
             throw new NotFoundException("UserDbStorage: пользователь с id: " + friendId + " не найден");
         }
         jdbcTemplate.update(queryDeleteFriend, userId, friendId);
@@ -80,18 +88,30 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public List<User> allUsers() {
+    public List<User> findAll() {
         String queryUsers = "SELECT u.*, uf.friend_id " +
                 "FROM users u " +
                 "LEFT JOIN user_friendships uf ON u.user_id = uf.user_id";
-        List<User> allUsers = jdbcTemplate.query(queryUsers, new UsersExtractor());
+        List<User> userRows = jdbcTemplate.query(queryUsers, userRowMapper);
+
+        Map<Integer, User> userMap = new HashMap<>();
+        for (User user : userRows) {
+            int userId = user.getId();
+            if (!userMap.containsKey(userId)) {
+                userMap.put(userId, user);
+            } else {
+                User existingUser = userMap.get(userId);
+                existingUser.getFriends().addAll(user.getFriends());
+            }
+        }
+        List<User> allUsers = new ArrayList<>(userMap.values());
         log.info("UserDbStorage: количество зарегистрированных пользователей: {}", allUsers.size());
         return allUsers;
     }
 
     @Override
-    public void updateUser(User user) {
-        if (!userExists(user.getId())) {
+    public void update(User user) {
+        if (!checkExists(user.getId())) {
             throw new NotFoundException("UserDbStorage: пользователь с id: " + user.getId() + " не найден");
         }
         try {
@@ -109,7 +129,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public User addUser(User user) {
+    public User add(User user) {
         String query = "INSERT INTO users (email, login, name, birthday) VALUES (?, ?, ?, ?)";
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
 

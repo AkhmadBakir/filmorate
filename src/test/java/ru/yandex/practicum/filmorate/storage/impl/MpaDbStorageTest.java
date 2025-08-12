@@ -24,8 +24,8 @@ class MpaDbStorageTest {
 
     @Test
     void shouldMpaExists() {
-        boolean isExists1 = mpaDbStorage.mpaExists(1);
-        boolean isExists2 = mpaDbStorage.mpaExists(100);
+        boolean isExists1 = mpaDbStorage.checkExists(1);
+        boolean isExists2 = mpaDbStorage.checkExists(100);
 
         assertThat(isExists1)
                 .isEqualTo(true);
@@ -50,4 +50,5 @@ class MpaDbStorageTest {
                 .isNotNull()
                 .hasSize(5);
     }
+
 }

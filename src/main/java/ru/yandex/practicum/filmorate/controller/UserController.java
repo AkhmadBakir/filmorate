@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.service.impl.UserServiceImpl;
 import ru.yandex.practicum.filmorate.storage.dto.NewUserRequest;
 import ru.yandex.practicum.filmorate.storage.dto.UpdateUserRequest;
 import ru.yandex.practicum.filmorate.storage.dto.UserDto;
@@ -20,7 +20,7 @@ import java.util.List;
 @RequestMapping("/users")
 public class UserController {
 
-    private final UserService userService;
+    private final UserServiceImpl userServiceIml;
 
     /**
      * POST /users/ — создание пользователя.
@@ -30,7 +30,7 @@ public class UserController {
      */
     @PostMapping
     public ResponseEntity<UserDto> addUser(@RequestBody NewUserRequest newUserRequest) {
-        UserDto userDto = userService.addUser(newUserRequest);
+        UserDto userDto = userServiceIml.add(newUserRequest);
         log.info("UserController: добавлен новый пользователь: {}", userDto.getId());
         return ResponseEntity.ok(userDto);
     }
@@ -43,7 +43,7 @@ public class UserController {
      */
     @PutMapping()
     public ResponseEntity<UserDto> updateUser(@RequestBody UpdateUserRequest updateUserRequest) {
-        UserDto userDto = userService.updateUser(updateUserRequest);
+        UserDto userDto = userServiceIml.update(updateUserRequest);
         log.info("UserController: данные пользователя обновлены: {}", userDto.getId());
         return ResponseEntity.ok(userDto);
     }
@@ -55,8 +55,8 @@ public class UserController {
      */
     @GetMapping()
     public ResponseEntity<List<UserDto>> allUsers() {
-        log.info("UserController: количество всех пользователей: {}", userService.allUsers().size());
-        return ResponseEntity.ok(userService.allUsers());
+        log.info("UserController: количество всех пользователей: {}", userServiceIml.findAll().size());
+        return ResponseEntity.ok(userServiceIml.findAll());
     }
 
     /**
@@ -68,7 +68,7 @@ public class UserController {
     @GetMapping("/{userId}")
     public ResponseEntity<UserDto> getUser(@PathVariable(value = "userId") int userId) {
         log.info("UserController: запрошен пользователь с id: {}", userId);
-        return ResponseEntity.ok(userService.getUserById(userId));
+        return ResponseEntity.ok(userServiceIml.findById(userId));
     }
 
     /**
@@ -81,7 +81,7 @@ public class UserController {
     @PutMapping("/{userId}/friends/{friendId}")
     public void addFriends(@PathVariable(value = "userId") int userId,
                            @PathVariable(value = "friendId") int friendId) {
-        userService.addFriends(userId, friendId);
+        userServiceIml.addFriends(userId, friendId);
         log.info("UserController: пользователи с id {} и id {} добавлены в друзья", userId, friendId);
     }
 
@@ -95,7 +95,7 @@ public class UserController {
     @DeleteMapping("/{userId}/friends/{friendId}")
     public void removeFriend(@PathVariable(value = "userId") int userId,
                              @PathVariable(value = "friendId") int friendId) {
-        userService.removeFriends(userId, friendId);
+        userServiceIml.removeFriends(userId, friendId);
         log.info("UserController: пользователи с id {} и id {} удалены из друзей", userId, friendId);
     }
 
@@ -108,7 +108,7 @@ public class UserController {
     @GetMapping("/{userId}/friends")
     public ResponseEntity<List<UserDto>> getFriendsList(@PathVariable(value = "userId") int userId) {
         log.info("UserController: запрошен пользователь с id: {}", userId);
-        return ResponseEntity.ok(userService.getFriendsList(userId));
+        return ResponseEntity.ok(userServiceIml.getFriendsList(userId));
     }
 
     /**
@@ -122,7 +122,7 @@ public class UserController {
     public ResponseEntity<List<UserDto>> getCommonFriendsList(@PathVariable(value = "userId") int userId,
                                                               @PathVariable(value = "otherId") int otherId) {
         log.info("UserController: запрошен список общих друзей пользователей с id {} и id {}", userId, otherId);
-        return ResponseEntity.ok(userService.getCommonFriendsList(userId, otherId));
+        return ResponseEntity.ok(userServiceIml.getCommonFriendsList(userId, otherId));
     }
 
 }
