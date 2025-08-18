@@ -4,12 +4,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.mappers.FilmMapper;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.impl.FilmServiceImpl;
 import ru.yandex.practicum.filmorate.storage.dto.FilmDto;
 import ru.yandex.practicum.filmorate.storage.dto.NewFilmRequest;
 import ru.yandex.practicum.filmorate.storage.dto.UpdateFilmRequest;
+import ru.yandex.practicum.filmorate.storage.impl.FilmDbStorage;
+import ru.yandex.practicum.filmorate.util.FilmValidator;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Контроллер HTTP запросов FilmController
@@ -21,6 +26,7 @@ import java.util.*;
 public class FilmController {
 
     private final FilmServiceImpl filmServiceImpl;
+    private final FilmDbStorage filmDbStorage;
 
     /**
      * POST /films/ — создание фильма.
@@ -30,7 +36,10 @@ public class FilmController {
      */
     @PostMapping
     public ResponseEntity<FilmDto> addFilm(@RequestBody NewFilmRequest newFilmRequest) {
-        FilmDto filmDto = filmServiceImpl.add(newFilmRequest);
+        FilmValidator.validator(newFilmRequest);
+        Film film = FilmMapper.mapToFilm(newFilmRequest);
+        filmServiceImpl.add(film);
+        FilmDto filmDto = FilmMapper.mapToFilmDto(film);
         log.info("FilmController: добавлен новый фильм: {}", filmDto.getId());
         return ResponseEntity.ok(filmDto);
     }
@@ -43,7 +52,10 @@ public class FilmController {
      */
     @PutMapping()
     public ResponseEntity<FilmDto> updateFilm(@RequestBody UpdateFilmRequest updateFilmRequest) {
-        FilmDto filmDto = filmServiceImpl.update(updateFilmRequest);
+        Film film = filmDbStorage.findById(updateFilmRequest.getId());
+        FilmMapper.updateFilm(film, updateFilmRequest);
+        filmServiceImpl.update(film);
+        FilmDto filmDto = FilmMapper.mapToFilmDto(film);
         log.info("FilmController: фильм обновлен: {}", updateFilmRequest.getId());
         return ResponseEntity.ok(filmDto);
     }
@@ -56,7 +68,9 @@ public class FilmController {
     @GetMapping
     public ResponseEntity<List<FilmDto>> allFilms() {
         log.info("FilmController: количество всех фильмов: {}", filmServiceImpl.findAll().size());
-        return ResponseEntity.ok(filmServiceImpl.findAll());
+        return ResponseEntity.ok(filmServiceImpl.findAll().stream()
+                .map(FilmMapper::mapToFilmDto)
+                .collect(Collectors.toList()));
     }
 
     /**
@@ -68,7 +82,8 @@ public class FilmController {
     @GetMapping("/{filmId}")
     public ResponseEntity<FilmDto> getFilm(@PathVariable(value = "filmId") int filmId) {
         log.info("FilmController: запрошен фильм с id: {}", filmId);
-        return ResponseEntity.ok(filmServiceImpl.findById(filmId));
+        FilmDto filmDto = FilmMapper.mapToFilmDto(filmServiceImpl.findById(filmId));
+        return ResponseEntity.ok(filmDto);
     }
 
     @PutMapping("/{filmId}/like/{userId}")

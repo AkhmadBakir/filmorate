@@ -4,12 +4,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.mappers.UserMapper;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.impl.UserServiceImpl;
 import ru.yandex.practicum.filmorate.storage.dto.NewUserRequest;
 import ru.yandex.practicum.filmorate.storage.dto.UpdateUserRequest;
 import ru.yandex.practicum.filmorate.storage.dto.UserDto;
+import ru.yandex.practicum.filmorate.storage.impl.UserDbStorage;
+import ru.yandex.practicum.filmorate.util.UserValidator;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Контроллер HTTP запросов UserController
@@ -21,6 +26,7 @@ import java.util.List;
 public class UserController {
 
     private final UserServiceImpl userServiceIml;
+    private final UserDbStorage userDbStorage;
 
     /**
      * POST /users/ — создание пользователя.
@@ -30,7 +36,9 @@ public class UserController {
      */
     @PostMapping
     public ResponseEntity<UserDto> addUser(@RequestBody NewUserRequest newUserRequest) {
-        UserDto userDto = userServiceIml.add(newUserRequest);
+        UserValidator.validator(newUserRequest);
+        User user = userDbStorage.add(UserMapper.mapToUser(newUserRequest));
+        UserDto userDto = UserMapper.mapToUserDto(user);
         log.info("UserController: добавлен новый пользователь: {}", userDto.getId());
         return ResponseEntity.ok(userDto);
     }
@@ -43,7 +51,10 @@ public class UserController {
      */
     @PutMapping()
     public ResponseEntity<UserDto> updateUser(@RequestBody UpdateUserRequest updateUserRequest) {
-        UserDto userDto = userServiceIml.update(updateUserRequest);
+        User user = userDbStorage.findById(updateUserRequest.getId());
+        UserMapper.updateUser(user, updateUserRequest);
+        userServiceIml.update(user);
+        UserDto userDto = UserMapper.mapToUserDto(user);
         log.info("UserController: данные пользователя обновлены: {}", userDto.getId());
         return ResponseEntity.ok(userDto);
     }
@@ -56,7 +67,9 @@ public class UserController {
     @GetMapping()
     public ResponseEntity<List<UserDto>> allUsers() {
         log.info("UserController: количество всех пользователей: {}", userServiceIml.findAll().size());
-        return ResponseEntity.ok(userServiceIml.findAll());
+        return ResponseEntity.ok(userServiceIml.findAll().stream()
+                .map(UserMapper::mapToUserDto)
+                .collect(Collectors.toList()));
     }
 
     /**
@@ -68,7 +81,8 @@ public class UserController {
     @GetMapping("/{userId}")
     public ResponseEntity<UserDto> getUser(@PathVariable(value = "userId") int userId) {
         log.info("UserController: запрошен пользователь с id: {}", userId);
-        return ResponseEntity.ok(userServiceIml.findById(userId));
+        UserDto userDto = UserMapper.mapToUserDto(userServiceIml.findById(userId));
+        return ResponseEntity.ok(userDto);
     }
 
     /**

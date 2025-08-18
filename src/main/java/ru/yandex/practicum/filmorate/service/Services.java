@@ -2,13 +2,13 @@ package ru.yandex.practicum.filmorate.service;
 
 import java.util.List;
 
-public interface Services<T, N, U> {
+public interface Services<T> {
 
-    T add(N newRequest);
+    void add(T t);
 
     List<T> findAll();
 
-    T update(U updateRequest);
+    void update(T t);
 
     T findById(int id);
 

@@ -3,16 +3,12 @@ package ru.yandex.practicum.filmorate.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.mappers.UserMapper;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.Services;
-import ru.yandex.practicum.filmorate.storage.dto.NewUserRequest;
-import ru.yandex.practicum.filmorate.storage.dto.UpdateUserRequest;
 import ru.yandex.practicum.filmorate.storage.dto.UserDto;
 import ru.yandex.practicum.filmorate.storage.impl.UserDbStorage;
-import ru.yandex.practicum.filmorate.util.UserValidator;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -23,44 +19,33 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class UserServiceImpl implements Services<UserDto, NewUserRequest, UpdateUserRequest> {
+public class UserServiceImpl implements Services<User> {
 
     private final UserDbStorage userDbStorage;
 
     @Override
-    public UserDto add(NewUserRequest newUserRequest) {
-        UserValidator.validator(newUserRequest);
-        User user = userDbStorage.add(UserMapper.mapToUser(newUserRequest));
+    public void add(User user) {
+        userDbStorage.add(user);
         log.info("UserServiceImpl: добавлен пользователь с id {} ", user.getId());
-        return UserMapper.mapToUserDto(user);
     }
 
     @Override
-    public UserDto update(UpdateUserRequest updateUserRequest) {
-        User user = userDbStorage.findById(updateUserRequest.getId());
-        if (user == null) {
-            throw new NotFoundException("пользователь с id " + updateUserRequest.getId() + " не найден");
-        }
-        UserMapper.updateUser(user, updateUserRequest);
+    public void update(User user) {
         userDbStorage.update(user);
         log.info("UserServiceImpl: данные пользователя с id {} обновлены ", user.getId());
-        return UserMapper.mapToUserDto(user);
     }
 
     @Override
-    public List<UserDto> findAll() {
+    public List<User> findAll() {
         List<User> allUsers = userDbStorage.findAll();
         log.info("UserServiceImpl: запрошен список всех пользователей, всего пользователей {}", allUsers.size());
-        return allUsers.stream()
-                .map(UserMapper::mapToUserDto)
-                .collect(Collectors.toList());
+        return allUsers;
     }
 
     @Override
-    public UserDto findById(int userId) {
+    public User findById(int userId) {
         log.info("UserServiceImpl: запрошен пользователь с id {} ", userId);
-        User user = userDbStorage.findById(userId);
-        return UserMapper.mapToUserDto(user);
+        return userDbStorage.findById(userId);
     }
 
     public void addFriends(int userId, int friendId) {
