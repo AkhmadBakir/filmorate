@@ -4,9 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.mappers.UserMapper;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.service.Services;
+import ru.yandex.practicum.filmorate.storage.dto.UserDto;
+import ru.yandex.practicum.filmorate.storage.impl.UserDbStorage;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -17,89 +19,71 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements Services<User> {
 
-    private final UserStorage userStorage;
+    private final UserDbStorage userDbStorage;
 
     @Override
-    public User addUser(User user) {
-        log.info("добавлен пользователь с id {} ", user.getId());
-        return userStorage.addUser(user);
+    public void add(User user) {
+        userDbStorage.add(user);
+        log.info("UserServiceImpl: добавлен пользователь с id {} ", user.getId());
     }
 
     @Override
-    public User updateUser(User user) {
-        log.info("данные пользователя с id {} обновлены ", user.getId());
-        return userStorage.updateUser(user);
+    public void update(User user) {
+        userDbStorage.update(user);
+        log.info("UserServiceImpl: данные пользователя с id {} обновлены ", user.getId());
     }
 
     @Override
-    public List<User> allUsers() {
-        log.info("запрошен список всех пользователей, всего пользователей {}", userStorage.allUsers().size());
-        return userStorage.allUsers();
+    public List<User> findAll() {
+        List<User> allUsers = userDbStorage.findAll();
+        log.info("UserServiceImpl: запрошен список всех пользователей, всего пользователей {}", allUsers.size());
+        return allUsers;
     }
 
     @Override
-    public User getUserById(int userId) {
-        log.info("запрошен пользователь с id {} ", userId);
-        return userStorage.getUserById(userId);
+    public User findById(int userId) {
+        log.info("UserServiceImpl: запрошен пользователь с id {} ", userId);
+        return userDbStorage.findById(userId);
     }
 
-    @Override
-    public User addFriends(int userId, int friendId) {
+    public void addFriends(int userId, int friendId) {
         if (userId == friendId) {
-            throw new ValidationException("попытка добавления пользователя к себе в друзья");
+            throw new ValidationException("UserServiceImpl: попытка добавления пользователя к себе в друзья");
         }
-        User user = userStorage.getUserById(userId);
-        User friendUser = userStorage.getUserById(friendId);
-        if (user.getFriends() == null) {
-            user.setFriends(new HashSet<>());
-        }
-        if (friendUser.getFriends() == null) {
-            friendUser.setFriends(new HashSet<>());
-        }
-        user.getFriends().add(friendUser.getId());
-        friendUser.getFriends().add(user.getId());
-        log.info("пользователи с id " + userId + " и " + friendId + "теперь друзья");
-        return user;
+        userDbStorage.addFriendShips(userId, friendId);
+        log.info("UserServiceImpl: пользователи с id " + userId + " и " + friendId + " теперь друзья");
     }
 
-    @Override
-    public User removeFriends(int userId, int friendId) {
-        User user = userStorage.getUserById(userId);
-        User friendUser = userStorage.getUserById(friendId);
-        if (user.getFriends() == null) {
-            user.setFriends(new HashSet<>());
+    public void removeFriends(int userId, int friendId) {
+        if (userId == friendId) {
+            throw new ValidationException("UserServiceImpl: попытка добавления пользователя к себе в друзья");
         }
-        if (friendUser.getFriends() == null) {
-            friendUser.setFriends(new HashSet<>());
-        }
-        user.getFriends().remove(friendUser.getId());
-        friendUser.getFriends().remove(user.getId());
-        log.info("пользователи с id " + userId + " и " + friendId + "больше не друзья");
-        return user;
+        userDbStorage.deleteFriendShip(userId, friendId);
+        log.info("UserServiceImpl: пользователи с id " + userId + " и " + friendId + "больше не друзья");
     }
 
-    @Override
-    public List<User> getFriendsList(int userId) {
-        User user = userStorage.getUserById(userId);
+    public List<UserDto> getFriendsList(int userId) {
+        User user = userDbStorage.findById(userId);
         List<Integer> friendsId = new ArrayList<>(user.getFriends());
-        log.info("запрошен список друзей пользователя " + userId + " всего их " + friendsId.size());
+        log.info("UserServiceImpl: запрошен список друзей пользователя " + userId + " всего их " + friendsId.size());
         return friendsId.stream()
-                .map(userStorage::getUserById)
+                .map(userDbStorage::findById)
+                .map(UserMapper::mapToUserDto)
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public List<User> getCommonFriendsList(int userId, int otherId) {
-        User user = userStorage.getUserById(userId);
-        User otherUser = userStorage.getUserById(otherId);
+    public List<UserDto> getCommonFriendsList(int userId, int otherId) {
+        User user = userDbStorage.findById(userId);
+        User otherUser = userDbStorage.findById(otherId);
         Set<Integer> friendsList = new HashSet<>(user.getFriends());
         friendsList.retainAll(otherUser.getFriends());
         List<Integer> commonFriendsList = new ArrayList<>(friendsList);
-        log.info("запрошен список общих друзей пользователей с id " + userId + " и " + otherId);
+        log.info("UserServiceImpl: запрошен список общих друзей пользователей с id " + userId + " и " + otherId);
         return commonFriendsList.stream()
-                .map(userStorage::getUserById)
+                .map(userDbStorage::findById)
+                .map(UserMapper::mapToUserDto)
                 .collect(Collectors.toList());
     }
 
